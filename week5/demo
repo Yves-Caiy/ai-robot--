@@ -1,0 +1,115 @@
+import pybullet as p
+import pybullet_data as pd
+import time
+import math
+
+# 环境初始化
+p.connect(p.GUI)
+p.setAdditionalSearchPath(pd.getDataPath())
+p.setGravity(0, 0, -9.8)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)
+p.resetDebugVisualizerCamera(2.2, 0, -25, [0.6, 0, 0.75])
+
+p.loadURDF("plane.urdf")
+table_pos = [0.5, 0, 0]
+p.loadURDF("table/table.urdf", table_pos, useFixedBase=True)
+
+panda_pos = [0.5, 0, 0.625]
+pandaId = p.loadURDF("franka_panda/panda.urdf", panda_pos, useFixedBase=True)
+
+# 控制面板
+mode_toggle = p.addUserDebugParameter("RUN IK / JOINT", 0, 1, 0)
+ctrl_x = p.addUserDebugParameter("Target_X", 0.3, 0.8, 0.6)
+ctrl_y = p.addUserDebugParameter("Target_Y", -0.4, 0.4, 0.0)
+ctrl_z = p.addUserDebugParameter("Target_Z", 0.65, 1.2, 0.76)
+
+joint_params = []
+joint_names = ["J0_Base","J1_Shoulder","J2_Arm","J3_Elbow","J4_Forearm","J5_Wrist","J6_Flange"]
+joint_limits = [(-2.89,2.89),(-1.76,1.76),(-2.89,2.89),(-3.07,-0.06),(-2.89,2.89),(-0.01,3.75),(-2.89,2.89)]
+for i in range(7):
+    joint_params.append(p.addUserDebugParameter(joint_names[i], joint_limits[i][0], joint_limits[i][1], 0.0))
+
+info_id = -1
+
+# ===================== 【核心：预先生成完美正圆指导线】 =====================
+circle_points = []  # 标准正圆点库
+cx, cy, cz, r = 0.6, 0.0, 0.78, 0.10
+for i in range(360):
+    ang = math.radians(i)
+    x = cx + r * math.cos(ang)
+    y = cy + r * math.sin(ang)
+    z = cz
+    circle_points.append([x, y, z])
+
+# 画白色完美指导圆（只画一次）
+for i in range(len(circle_points)-1):
+    p.addUserDebugLine(circle_points[i], circle_points[i+1], [1,1,1], 2, lifeTime=0)
+p.addUserDebugLine(circle_points[-1], circle_points[0], [1,1,1], 2, lifeTime=0)
+
+# 自动画圆参数
+draw_auto = True
+point_idx = 0
+last_ee = None
+
+try:
+    while True:
+        run_ik = p.readUserDebugParameter(mode_toggle)
+
+        if draw_auto:
+            # 严格按【完美正圆点】运动
+            target = circle_points[point_idx]
+            tx, ty, tz = target[0], target[1], target[2]
+
+            # 超高精度 IK
+            jp = p.calculateInverseKinematics(
+                pandaId, 11, [tx,ty,tz],
+                p.getQuaternionFromEuler([math.pi,0,0]),
+                maxNumIterations=200, residualThreshold=1e-6
+            )
+
+            # 强力稳定控制
+            for i in range(7):
+                p.setJointMotorControl2(
+                    pandaId, i, p.POSITION_CONTROL, jp[i],
+                    force=1200, positionGain=0.4, velocityGain=0.8
+                )
+
+            # 实时画红线（机械臂真实位置）
+            curr_ee = p.getLinkState(pandaId, 11)[0]
+            if last_ee is not None:
+                p.addUserDebugLine(last_ee, curr_ee, [1,0,0], 3, lifeTime=15)
+            last_ee = curr_ee
+
+            # 匀速走圆
+            point_idx = (point_idx + 2) % 360
+            if point_idx == 0:
+                draw_auto = False
+                last_ee = None
+
+            mode_str = "✅ AUTO: PERFECT CIRCLE (WHITE GUIDE)"
+
+        elif run_ik > 0.5:
+            tx = p.readUserDebugParameter(ctrl_x)
+            ty = p.readUserDebugParameter(ctrl_y)
+            tz = p.readUserDebugParameter(ctrl_z)
+            jp = p.calculateInverseKinematics(pandaId,11,[tx,ty,tz],p.getQuaternionFromEuler([math.pi,0,0]))
+            for i in range(7):
+                p.setJointMotorControl2(pandaId,i,p.POSITION_CONTROL,jp[i],force=800)
+            mode_str = "MODE: IK CONTROL"
+        else:
+            for i in range(7):
+                v = p.readUserDebugParameter(joint_params[i])
+                p.setJointMotorControl2(pandaId,i,p.POSITION_CONTROL,v,force=800)
+            mode_str = "MODE: JOINT CONTROL"
+
+        # 信息显示
+        ee = p.getLinkState(pandaId,11)[0]
+        if info_id != -1: p.removeUserDebugItem(info_id)
+        txt = f"{mode_str}\nXYZ: {ee[0]:.3f} | {ee[1]:.3f} | {ee[2]:.3f}"
+        info_id = p.addUserDebugText(txt, [0.4,-0.9,0.8], [0,0,0], 1.2)
+
+        p.stepSimulation()
+        time.sleep(1/120)
+
+except:
+    p.disconnect()
