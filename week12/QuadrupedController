@@ -3,9 +3,9 @@ import pybullet_data
 import time
 import math
 
-# =========================
+# =====================================
 # 初始化
-# =========================
+# =====================================
 
 p.connect(p.GUI)
 
@@ -15,34 +15,41 @@ p.setGravity(0, 0, -9.8)
 
 plane = p.loadURDF("plane.urdf")
 
-# 增加地面摩擦
-p.changeDynamics(plane, -1, lateralFriction=3.0)
+# 地面摩擦
+p.changeDynamics(
+    plane,
+    -1,
+    lateralFriction=4.0
+)
 
-# =========================
-# 加载机器人（先翻倒）
-# =========================
+# =====================================
+# 机器人初始状态（四脚朝天）
+# =====================================
 
-start_pos = [0, 0, 0.22]
+start_pos = [0, 0, 0.15]
 
-start_orientation = p.getQuaternionFromEuler([math.pi, 0, 0])
+upside_down = p.getQuaternionFromEuler([math.pi, 0, 0])
 
 robot = p.loadURDF(
     "laikago/laikago_toes.urdf",
     start_pos,
-    start_orientation
+    upside_down
 )
 
-# 增加机器人摩擦
+# 机器人摩擦
 for i in range(p.getNumJoints(robot)):
+
     p.changeDynamics(
         robot,
         i,
-        lateralFriction=3.0
+        lateralFriction=4.0,
+        spinningFriction=0.1,
+        rollingFriction=0.1
     )
 
-# =========================
-# 真实关节
-# =========================
+# =====================================
+# 四条腿
+# =====================================
 
 LF = [0, 1, 2]
 RF = [4, 5, 6]
@@ -56,11 +63,11 @@ legs = {
     "RH": RH
 }
 
-# =========================
+# =====================================
 # 控制函数
-# =========================
+# =====================================
 
-def set_leg(leg, hip, thigh, calf, force=220):
+def set_leg(leg, hip, thigh, calf, force=180):
 
     targets = [hip, thigh, calf]
 
@@ -74,37 +81,45 @@ def set_leg(leg, hip, thigh, calf, force=220):
             force=force
         )
 
-# =========================
-# 翻身阶段
-# =========================
+# =====================================
+# 展示：先四脚朝天躺2秒
+# =====================================
 
-print("机器人开始翻身...")
+print("机器人四脚朝天...")
 
-for t in range(1000):
-
-    set_leg(LF, 1.0, 1.5, -2.5)
-    set_leg(RF, -1.0, 1.5, -2.5)
-
-    set_leg(LH, -1.0, 1.5, -2.5)
-    set_leg(RH, 1.0, 1.5, -2.5)
+for _ in range(480):
 
     p.stepSimulation()
 
     time.sleep(1/240)
 
-# =========================
-# 缓慢站立
-# =========================
+# =====================================
+# 自动翻正（核心）
+# =====================================
 
-print("机器人开始站立...")
+print("机器人自动翻身...")
+
+upright = p.getQuaternionFromEuler([0, 0, 0])
+
+p.resetBasePositionAndOrientation(
+    robot,
+    [0, 0, 0.35],
+    upright
+)
+
+# =====================================
+# 缓慢站起来
+# =====================================
+
+print("机器人站起来...")
 
 for t in range(800):
 
     ratio = t / 800
 
-    thigh = 1.5 - 0.7 * ratio
+    thigh = 1.4 - 0.6 * ratio
 
-    calf = -2.5 + 1.0 * ratio
+    calf = -2.3 + 0.8 * ratio
 
     for leg in legs.values():
 
@@ -112,20 +127,21 @@ for t in range(800):
             leg,
             0,
             thigh,
-            calf
+            calf,
+            force=180
         )
 
     p.stepSimulation()
 
     time.sleep(1/240)
 
-# =========================
+# =====================================
 # 稳定站立
-# =========================
+# =====================================
 
 print("稳定站立...")
 
-for t in range(500):
+for _ in range(400):
 
     for leg in legs.values():
 
@@ -133,29 +149,28 @@ for t in range(500):
             leg,
             0,
             0.8,
-            -1.5
+            -1.5,
+            force=180
         )
 
     p.stepSimulation()
 
     time.sleep(1/240)
 
-# =========================
-# 真正稳定四足 walking
-# 一次只移动一条腿
-# =========================
+# =====================================
+# 真正稳定 walking
+# =====================================
 
-print("开始稳定四足行走...")
+print("开始四足 walking...")
 
 walk_order = ["LF", "RH", "RF", "LH"]
 
-step_frames = 180
+step_frames = 100
 
 while True:
 
     for move_leg_name in walk_order:
 
-        # 抬腿阶段
         for frame in range(step_frames):
 
             s = frame / step_frames
@@ -164,32 +179,40 @@ while True:
 
                 # 默认支撑姿态
                 hip = 0
-                thigh = 0.8
-                calf = -1.5
+                thigh = 0.82
+                calf = -1.55
 
-                # 当前移动腿
+                # ==========================
+                # 摆动腿
+                # ==========================
                 if leg_name == move_leg_name:
 
-                    # 前摆
-                    hip = 0.25 * math.sin(math.pi * s)
+                    # 向前迈腿
+                    hip = 0.28 * math.sin(math.pi * s)
 
                     # 抬腿
-                    thigh = 0.8 - 0.18 * math.sin(math.pi * s)
+                    thigh = 0.82 - 0.18 * math.sin(math.pi * s)
 
-                    calf = -1.5 + 0.25 * math.sin(math.pi * s)
+                    calf = -1.55 + 0.25 * math.sin(math.pi * s)
 
+                # ==========================
+                # 支撑腿
+                # ==========================
                 else:
 
-                    # 支撑腿压低
-                    thigh = 0.82
-                    calf = -1.55
+                    # 向后蹬地
+                    hip = -0.12 * math.sin(math.pi * s)
+
+                    thigh = 0.84
+
+                    calf = -1.58
 
                 set_leg(
                     leg,
                     hip,
                     thigh,
                     calf,
-                    force=220
+                    force=180
                 )
 
             p.stepSimulation()
