@@ -1,123 +1,129 @@
-# ai-robot--
-# 🤖 AI Robotics Homework
+# 🤖 AI Robotics Portfolio
 
-欢迎来到我的 AI Robotics 课程作业网站。
+Welcome to my AI Robotics course repository.
+
+This repository contains my robotics, ROS2, Docker, Linux, and AI learning projects.
 
 ---
 
-## 👨‍💻 About Me
+# 👨‍💻 About Me
 
-- Name: Cai Yaolei
-- Course: AI Robotics
-- Platform: ROS2 + Docker + Ubuntu
+| Item | Content |
+|---|---|
+| Name | Cai Yaolei |
+| Course | AI Robotics |
+| OS | Ubuntu 22.04 + WSL2 |
+| Robotics | ROS2 Humble |
+| Language | Python |
+| Tools | Docker / VS Code / GitHub |
+
+---
+
+# 🚀 Tech Stack
+
+![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-orange)
+![Python](https://img.shields.io/badge/Python-3.10-green)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
+![OpenCV](https://img.shields.io/badge/OpenCV-ComputerVision-red)
 
 ---
 
 # 📚 Weekly Homework
 
-## Week 2
-### WSL、Ubuntu 与 ROS2 环境配置
+## ✅ Week 2 — Ubuntu & ROS2 Setup
 
-- Ubuntu 安装
-- ROS2 Humble 配置
-- turtlesim 小乌龟实验
+- Ubuntu installation
+- ROS2 Humble setup
+- turtlesim
+- Linux environment configuration
 
-👉 [进入 Week2](week2/)
+👉 [Open Week2](week2/)
 
 ---
 
-## Week 3
-### GitHub SSH 与 VS Code
+## ✅ Week 3 — GitHub & VS Code
 
-- GitHub SSH Key
+- GitHub SSH
 - VS Code Remote WSL
-- ROS2 Topic 实验
+- ROS2 Topic communication
 
-👉 [进入 Week3](week3/)
-
----
-
-## Week 4
-### Python 与机器人基础
-
-- Python 仿真
-- 机器人运动学
-- 命令行基础
-
-👉 [进入 Week4](week4/)
+👉 [Open Week3](week3/)
 
 ---
 
-## Week 5
-### Linux 与机器人运动学
+## ✅ Week 4 — Python Robotics Basics
 
-- Linux 文件系统
+- Python simulation
+- Robot kinematics
+- Linux command line
+
+👉 [Open Week4](week4/)
+
+---
+
+## ✅ Week 5 — Linux & Robot Kinematics
+
+- Linux filesystem
 - FK / IK
 - Panda Robot
 
-👉 [进入 Week5](week5/)
+👉 [Open Week5](week5/)
 
 ---
 
-## Week 6
-### 传感器与 ROS2 可视化
+## ✅ Week 6 — Sensors & Visualization
 
-- KITTI 数据集
+- KITTI dataset
 - RViz
 - rqt
 
-👉 [进入 Week6](week6/)
+👉 [Open Week6](week6/)
 
 ---
 
-## Week 8
-### Docker 与 ROS2 Desktop
+## ✅ Week 8 — Docker & ROS2 Desktop
 
-- Docker 安装
-- ROS2 容器
-- noVNC 图形界面
+- Docker installation
+- ROS2 container
+- noVNC GUI
 
-👉 [进入 Week8](week8/)
+👉 [Open Week8](week8/)
 
 ---
 
-## Week 10
-### OpenCV 与计算机视觉
+## ✅ Week 10 — OpenCV & Computer Vision
 
-- OpenCV 安装
-- 图像处理
+- OpenCV
+- Image processing
 - Python OpenCV
 
-👉 [进入 Week10](week10/)
+👉 [Open Week10](week10/)
 
 ---
 
-## Week 11
-### Docker 镜像保存与环境配置
+## ✅ Week 11 — Docker Environment
 
 - docker commit
 - pybullet
 - numpy
 - opencv
 
-👉 [进入 Week11](week11/)
+👉 [Open Week11](week11/)
 
 ---
 
-# 🌐 GitHub Pages
+# 📂 Repository Structure
 
-Website:
-
-https://你的用户名.github.io/仓库名/
-
----
-
-# 🛠️ Technology Stack
-
-- Ubuntu 22.04
-- ROS2 Humble
-- Docker
-- Python
-- OpenCV
-- PyBullet
-- GitHub Pages
+```bash
+ai-robot--
+│
+├── week2/
+├── week3/
+├── week4/
+├── week5/
+├── week6/
+├── week8/
+├── week10/
+├── week11/
+└── README.md
