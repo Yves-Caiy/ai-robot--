@@ -1,0 +1,14 @@
+添加换行
+
+本周课程主要实现了基于 Flask、OpenCV 与 Tailscale 的手机摄像头桥接系统，
+通过 HTTPS 网络通信将手机实时视频流传输到 Ubuntu 服务器中，
+并使用 OpenCV 完成 ArUco Marker 的识别与检测。
+
+课程中成功搭建了 Flask Web Server，
+完成 Python 依赖环境配置，
+实现手机浏览器远程访问本地 AI 视觉系统，
+并通过 OpenCV ArUco 模块识别指定 Marker ID。
+
+整个项目结合了 Ubuntu、WSL2、Python、OpenCV、网络通信与计算机视觉等核心技术，
+构建了一个完整的机器人视觉基础系统，
+为后续 ROS2、SLAM、机器人导航与 AI Vision 项目开发提供了重要基础。
