@@ -277,28 +277,6 @@ https://Yves-Caiy.github.io/ai-robot--
 
 ---
 
-# 🖼️ PROJECT SHOWCASE
-
-## 🤖 ROS2 turtlesim
-> Add screenshot here
-
----
-
-## 👁️ OpenCV AI Vision
-> Add screenshot here
-
----
-
-## 🐳 Docker ROS2 Desktop
-> Add screenshot here
-
----
-
-## 📡 RViz Visualization
-> Add screenshot here
-
----
-
 # 🔥 FUTURE RESEARCH
 
 - SLAM
